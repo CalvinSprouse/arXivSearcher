@@ -98,8 +98,3 @@ for number, article in enumerate(articles):
 
     # report
     print(f"{number}: Downloaded {new_title}")
-
-# %%
-
-
-
