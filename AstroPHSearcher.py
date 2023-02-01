@@ -47,6 +47,9 @@ def recursive_page_scrape(base_url: str, url_num: int = 0, interval_timer: int =
             # skip article if no pdf links are present
             if len(pdf_link) != 1: continue
 
+            # skip article if not a stellar astro article
+            if "astro-ph.SR" not in str(article): continue
+
             # extract single link and append results to list
             pdf_link = pdf_link[0]
             articles_list.append((title, pdf_link))
@@ -68,7 +71,6 @@ def recursive_page_scrape(base_url: str, url_num: int = 0, interval_timer: int =
 
 # %%
 # get the list of articles
-print("Scraping articles.")
 articles = recursive_page_scrape(base_url=astro_ph_url_base, do_outputs=False, interval_timer=0)
 print(f"Scraped {len(articles)} articles.")
 
@@ -76,7 +78,7 @@ print(f"Scraped {len(articles)} articles.")
 # save the list of articles to a file
 # first the list has to be made into a dict, the key will just be the number of the article
 saved_articles_dict = [{num: {"title": art[0], "link": art[1]}} for num, art in enumerate(articles)]
-print(f"{len(saved_articles_dict)} articles saved.")
+print(f"{len(saved_articles_dict)} articles saved")
 # print(json.dumps(saved_articles_dict))
 
 # open/make a new file to dump to
@@ -90,11 +92,13 @@ os.makedirs(article_folder, exist_ok=True)
 # download and save all articles
 for number, article in enumerate(articles):
     # define a new title
-    new_title = re.sub(r"\$\\.*{([^}]*)}\$", r"\g<1>", str(article[0])).replace(" ", "_").replace("$", "") + ".pdf"
+    new_title = re.sub(r"\$\\.*{([^}]*)}\$", r"\g<1>", str(article[0])).replace(" ", "_").replace("$", "").replace("/", "-").replace("\\", "-") + ".txt"
 
     # download pdf
-    r = requests.get(article[1], stream=True)
-    with open(os.path.join(article_folder, new_title), "wb") as download: download.write(r.content)
+    # r = requests.get(article[1], stream=True)
+    # with open(os.path.join(article_folder, new_title), "wb") as download: download.write(r.content)
+    # save as text file with link for sorting
+    with open(os.path.join(article_folder, new_title), "w") as writer: writer.write(article[1])
 
     # report
     print(f"{number}: Downloaded {new_title}")
